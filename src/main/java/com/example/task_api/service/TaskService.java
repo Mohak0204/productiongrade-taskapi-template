@@ -1,6 +1,7 @@
 package com.example.task_api.service;
 
 import com.example.task_api.dto.TaskCreateRequest;
+import com.example.task_api.dto.TaskPageResponse;
 import com.example.task_api.dto.TaskResponse;
 import com.example.task_api.entity.Task;
 import com.example.task_api.exception.TaskNotFoundException;
@@ -21,7 +22,7 @@ public class TaskService {
     }
 
     // GET /api/tasks
-    public Page<TaskResponse> getTasks(String title,Pageable pageable) {
+    public TaskPageResponse getTasks(String title, Pageable pageable) {
 
         Page<Task> taskPage ;
         if (title == null || title.isBlank()) {
@@ -35,14 +36,23 @@ public class TaskService {
             taskPage = taskRepository
                     .findByTitleContainingIgnoreCase(title, pageable);
         }
-
-        return taskPage.map(task ->
+        Page<TaskResponse> responsePage = taskPage.map(task ->
                 new TaskResponse(
                         task.getId(),
                         task.getTitle(),
                         task.getDescription()
                 )
         );
+
+        return new TaskPageResponse(
+                responsePage.getContent(),
+                responsePage.getNumber(),
+                responsePage.getSize(),
+                responsePage.getTotalElements(),
+                responsePage.getTotalPages(),
+                responsePage.isLast()
+        );
+
     }
 
     // POST /api/tasks
