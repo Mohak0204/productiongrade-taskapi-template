@@ -21,9 +21,20 @@ public class TaskService {
     }
 
     // GET /api/tasks
-    public Page<TaskResponse> getTasks(Pageable pageable) {
+    public Page<TaskResponse> getTasks(String title,Pageable pageable) {
 
-        Page<Task> taskPage = taskRepository.findAll(pageable);
+        Page<Task> taskPage ;
+        if (title == null || title.isBlank()) {
+
+            // No filter → get all tasks
+            taskPage = taskRepository.findAll(pageable);
+
+        } else {
+
+            // Filter by title
+            taskPage = taskRepository
+                    .findByTitleContainingIgnoreCase(title, pageable);
+        }
 
         return taskPage.map(task ->
                 new TaskResponse(
